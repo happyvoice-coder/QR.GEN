@@ -1,23 +1,46 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e0e'/%3E%3Crect x='4' y='4' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='6' y='6' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='18' y='4' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='20' y='6' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='4' y='18' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='6' y='20' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='18' y='18' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='24' y='18' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='18' y='24' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='24' y='24' width='4' height='4' fill='%23e8ff47'/%3E%3C/svg%3E">
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
+  [data-theme="dark"] {
     --bg: #0e0e0e;
     --surface: #161616;
     --border: #2a2a2a;
-    --accent: #e8ff47;
     --text: #f0f0f0;
     --muted: #666;
-    --radius: 4px;
+    --checker-a: #333;
+    --checker-b: #1e1e1e;
+    --dl-hover: rgba(232,255,71,0.08);
+    --h1-dot: #e8ff47;
+    --btn-bg: #e8ff47;
+    --btn-fg: #0e0e0e;
+    --action-color: #e8ff47;
+  }
+
+  [data-theme="light"] {
+    --bg: #f0ede6;
+    --surface: #ffffff;
+    --border: #e0ddd6;
+    --text: #1a1a1a;
+    --muted: #999;
+    --checker-a: #ccc;
+    --checker-b: #e8e8e8;
+    --dl-hover: rgba(26,26,26,0.06);
+    --h1-dot: #e8a000;
+    --btn-bg: #1a1a1a;
+    --btn-fg: #f0ede6;
+    --action-color: #1a1a1a;
   }
 
   body {
@@ -29,10 +52,43 @@
     align-items: center;
     justify-content: center;
     padding: 32px 16px;
+    transition: background 0.25s, color 0.25s;
   }
 
-  .wrap { width: 100%; max-width: 480px; }
+  /* ══ THEME TOGGLE — fixed pill, top-right ══ */
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 999;
+    /* Override all button defaults */
+    width: auto !important;
+    margin-bottom: 0 !important;
+    padding: 8px 14px !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 999px !important;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .theme-toggle:hover { opacity: 0.8; transform: none !important; }
+  .theme-toggle:active { transform: scale(0.97) !important; }
+  .toggle-icon { width: 14px; height: 14px; flex-shrink: 0; }
 
+  /* ══ Layout ══ */
+  .wrap { width: 100%; max-width: 480px; }
   header { margin-bottom: 40px; }
 
   h1 {
@@ -42,8 +98,7 @@
     line-height: 1;
     letter-spacing: -0.03em;
   }
-
-  h1 span { color: var(--accent); }
+  h1 span { color: var(--h1-dot); transition: color 0.25s; }
 
   .sub {
     margin-top: 8px;
@@ -64,22 +119,32 @@
     margin-bottom: 8px;
   }
 
-  input[type="text"], input[type="number"], select {
+  input[type="text"],
+  input[type="number"],
+  select {
     width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 4px;
     color: var(--text);
     font-family: 'DM Mono', monospace;
     font-size: 14px;
     padding: 12px 14px;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, background 0.25s, color 0.25s;
+    -webkit-appearance: none;
+    appearance: none;
   }
-
   input[type="text"]:focus,
   input[type="number"]:focus,
-  select:focus { border-color: var(--accent); }
+  select:focus { border-color: var(--text); }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
 
   .row {
     display: grid;
@@ -94,46 +159,94 @@
     gap: 10px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 4px;
     padding: 10px 14px;
     cursor: pointer;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, background 0.25s;
   }
-
-  .color-wrap:focus-within { border-color: var(--accent); }
+  .color-wrap:focus-within { border-color: var(--text); }
 
   input[type="color"] {
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: none;
-    padding: 0;
-    cursor: pointer;
-    border-radius: 2px;
+    width: 28px; height: 28px;
+    border: none; background: none; padding: 0;
+    cursor: pointer; border-radius: 2px;
+    -webkit-appearance: none;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type="color"]::-webkit-color-swatch { border: none; border-radius: 2px; }
+
+  .color-val { font-size: 13px; color: var(--text); flex: 1; text-transform: uppercase; transition: color 0.25s; }
+
+  /* ══ Radius slider ══ */
+  .radius-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .radius-header label { margin-bottom: 0; }
+
+  .radius-preview { display: flex; gap: 6px; align-items: center; }
+
+  .rp-box {
+    width: 14px; height: 14px;
+    background: var(--text);
+    transition: border-radius 0.15s, background 0.25s;
+    flex-shrink: 0;
   }
 
-  .color-val { font-size: 13px; color: var(--text); flex: 1; text-transform: uppercase; }
+  .radius-pct { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; min-width: 28px; text-align: right; }
 
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--btn-bg);
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--btn-bg);
+    border: none;
+    cursor: pointer;
+  }
+
+  /* ══ Main button ══ */
   button {
     width: 100%;
     padding: 14px;
-    background: var(--accent);
-    color: #0e0e0e;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
     border: none;
-    border-radius: var(--radius);
+    border-radius: 4px;
     font-family: 'Syne', sans-serif;
     font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
+    transition: opacity 0.15s, transform 0.1s, background 0.25s, color 0.25s;
     margin-bottom: 24px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
-
-  button:hover { opacity: 0.9; }
+  button:hover { opacity: 0.88; }
   button:active { transform: scale(0.99); }
 
+  /* ══ Preview ══ */
   #preview-area {
     display: none;
     flex-direction: column;
@@ -142,9 +255,9 @@
     padding: 28px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 4px;
+    transition: background 0.25s, border-color 0.25s;
   }
-
   #preview-area.visible { display: flex; }
 
   .preview-label {
@@ -160,47 +273,76 @@
     border-radius: 2px;
     overflow: hidden;
   }
-
   .canvas-container::before {
     content: '';
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     background-image:
-      linear-gradient(45deg, #333 25%, transparent 25%),
-      linear-gradient(-45deg, #333 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #333 75%),
-      linear-gradient(-45deg, transparent 75%, #333 75%);
+      linear-gradient(45deg, var(--checker-a) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--checker-a) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--checker-a) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--checker-a) 75%);
     background-size: 12px 12px;
     background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
-    background-color: #1e1e1e;
+    background-color: var(--checker-b);
     z-index: 0;
+    transition: background-color 0.25s;
   }
-
   #output-canvas {
-    position: relative;
-    z-index: 1;
+    position: relative; z-index: 1;
     display: block;
-    max-width: 320px;
-    max-height: 320px;
+    max-width: 280px; max-height: 280px;
+    width: 100%; height: auto;
   }
 
   #qr-hidden { position: absolute; left: -9999px; top: -9999px; }
 
-  .dl-btn {
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    margin-bottom: 0;
-    font-size: 13px;
-    padding: 11px;
+  .size-note { font-size: 11px; color: var(--muted); text-align: center; }
+
+  /* ══ Action buttons ══ */
+  .action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
   }
 
-  .dl-btn:hover { background: rgba(232,255,71,0.08); opacity: 1; }
+  .action-btn {
+    background: transparent !important;
+    border: 1px solid var(--action-color) !important;
+    color: var(--action-color) !important;
+    margin-bottom: 0 !important;
+    font-size: 12px !important;
+    padding: 11px 8px !important;
+    font-family: 'Syne', sans-serif;
+  }
+  .action-btn:hover { background: var(--dl-hover) !important; opacity: 1; }
 
-  .size-note { font-size: 11px; color: var(--muted); text-align: center; }
+  .copy-btn.copied {
+    border-color: #4caf50 !important;
+    color: #4caf50 !important;
+  }
+
+  /* ══ Mobile ══ */
+  @media (max-width: 480px) {
+    body { padding: 24px 16px 48px; align-items: flex-start; }
+    .wrap { padding-top: 64px; }
+    .theme-toggle { top: 12px; right: 12px; }
+    #output-canvas { max-width: 220px; max-height: 220px; }
+    #preview-area { padding: 20px 16px; }
+  }
+  @media (max-width: 360px) {
+    .row { grid-template-columns: 1fr; }
+    .action-row { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
+  <svg class="toggle-icon" id="theme-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+  <span id="theme-label"></span>
+</button>
+
 <div class="wrap">
   <header>
     <h1>QR<span>.</span>gen</h1>
@@ -209,7 +351,8 @@
 
   <div class="field">
     <label>URL или текст</label>
-    <input type="text" id="url-input" placeholder="https://example.com">
+    <input type="text" id="url-input" placeholder="https://example.com"
+      inputmode="url" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
   </div>
 
   <div class="row">
@@ -222,7 +365,7 @@
     </div>
     <div class="field">
       <label>Размер (px)</label>
-      <input type="number" id="size-input" value="512" min="128" max="2048" step="64">
+      <input type="number" id="size-input" value="512" min="128" max="2048" step="64" inputmode="numeric">
     </div>
   </div>
 
@@ -236,7 +379,17 @@
     </select>
   </div>
 
-  <br>
+  <div class="field" style="margin-bottom:24px;">
+    <div class="radius-header">
+      <label>Скругление модулей</label>
+      <div class="radius-preview">
+        <div class="rp-box" id="rp-box"></div>
+        <span class="radius-pct" id="radius-val">0%</span>
+      </div>
+    </div>
+    <input type="range" id="radius-input" min="0" max="50" value="0" step="1">
+  </div>
+
   <button onclick="generate()">Сгенерировать</button>
 
   <div id="preview-area">
@@ -245,17 +398,70 @@
       <canvas id="output-canvas"></canvas>
     </div>
     <p class="size-note" id="size-note"></p>
-    <button class="dl-btn" onclick="download()">↓ Скачать PNG</button>
+    <div class="action-row">
+      <button class="action-btn" onclick="download()">↓ Скачать PNG</button>
+      <button class="action-btn copy-btn" id="copy-btn" onclick="copyToClipboard()">⎘ Копировать</button>
+    </div>
   </div>
 </div>
 
 <div id="qr-hidden"></div>
 
 <script>
+/* ══ THEME ══ */
+const html = document.documentElement;
+
+function renderThemeIcon(theme) {
+  const icon  = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (theme === 'dark') {
+    icon.innerHTML = `
+      <circle cx="8" cy="8" r="2.8" fill="currentColor"/>
+      <line x1="8" y1="1.5" x2="8" y2="3"    stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="8" y1="13"  x2="8" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="1.5" y1="8" x2="3"   y2="8"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="13"  y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="3.4" y1="3.4"   x2="4.4" y2="4.4"   stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="11.6" y1="11.6" x2="12.6" y2="12.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="12.6" y1="3.4"  x2="11.6" y2="4.4"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="4.4" y1="11.6"  x2="3.4" y2="12.6"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    `;
+    label.textContent = 'День';
+  } else {
+    icon.innerHTML = `<path d="M12.5 9.5A5 5 0 0 1 6.5 3.5a.5.5 0 0 0-.6-.6A6 6 0 1 0 13.1 10.1a.5.5 0 0 0-.6-.6z" fill="currentColor"/>`;
+    label.textContent = 'Ночь';
+  }
+}
+
+function setTheme(t) {
+  html.setAttribute('data-theme', t);
+  renderThemeIcon(t);
+  localStorage.setItem('qr-theme', t);
+}
+
+function toggleTheme() {
+  setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+setTheme(localStorage.getItem('qr-theme') || 'light');
+
+/* ══ COLOR INPUT ══ */
 const fgInput = document.getElementById('fg-color');
 const fgVal   = document.getElementById('fg-val');
 fgInput.addEventListener('input', () => { fgVal.textContent = fgInput.value.toUpperCase(); });
 
+/* ══ RADIUS SLIDER ══ */
+const radiusInput = document.getElementById('radius-input');
+const radiusValEl = document.getElementById('radius-val');
+const rpBox       = document.getElementById('rp-box');
+
+radiusInput.addEventListener('input', () => {
+  const v = radiusInput.value;
+  radiusValEl.textContent = v + '%';
+  rpBox.style.borderRadius = v + '%';
+});
+
+/* ══ GENERATE ══ */
 function hexToRgb(hex) {
   return [
     parseInt(hex.slice(1,3), 16),
@@ -264,27 +470,38 @@ function hexToRgb(hex) {
   ];
 }
 
+function roundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y,     x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x,     y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x,     y,     x + r, y);
+  ctx.closePath();
+}
+
 function generate() {
   const url = document.getElementById('url-input').value.trim();
   if (!url) { alert('Введите URL или текст'); return; }
 
-  const size = Math.max(128, Math.min(2048, parseInt(document.getElementById('size-input').value) || 512));
-  const ec   = document.getElementById('ec-level').value;
-  const fg   = document.getElementById('fg-color').value;
+  const size   = Math.max(128, Math.min(2048, parseInt(document.getElementById('size-input').value) || 512));
+  const ec     = document.getElementById('ec-level').value;
+  const fg     = document.getElementById('fg-color').value;
+  const radius = parseInt(radiusInput.value);
 
   const hidden = document.getElementById('qr-hidden');
   hidden.innerHTML = '';
-
   const baseSize = 256;
 
   try {
-    // Always render black-on-white internally.
-    // This guarantees white = background, dark = module — regardless of chosen color.
-    // We recolor modules to the user's chosen color in the pixel pass below.
     new QRCode(hidden, {
       text: url,
-      width: baseSize,
-      height: baseSize,
+      width: baseSize, height: baseSize,
       colorDark:  '#000000',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel[ec]
@@ -299,37 +516,66 @@ function generate() {
     if (!srcCanvas) { alert('Не удалось создать QR'); return; }
 
     const tmp = document.createElement('canvas');
-    tmp.width  = baseSize;
-    tmp.height = baseSize;
-    const ctx  = tmp.getContext('2d');
+    tmp.width = tmp.height = baseSize;
+    const ctx = tmp.getContext('2d');
     ctx.drawImage(srcCanvas, 0, 0);
-
     const imgData = ctx.getImageData(0, 0, baseSize, baseSize);
     const d = imgData.data;
     const [tr, tg, tb] = hexToRgb(fg);
 
+    // Build module map
+    const isModule = new Uint8Array(baseSize * baseSize);
     for (let i = 0; i < d.length; i += 4) {
-      if (d[i] > 200 && d[i+1] > 200 && d[i+2] > 200) {
-        // White pixel = background → transparent
-        d[i+3] = 0;
-      } else {
-        // Dark pixel = module → apply chosen color
-        d[i]   = tr;
-        d[i+1] = tg;
-        d[i+2] = tb;
-        d[i+3] = 255;
-      }
+      isModule[i / 4] = d[i] < 128 ? 1 : 0;
     }
-    ctx.putImageData(imgData, 0, 0);
 
-    // Scale to requested size with nearest-neighbour (crisp pixels)
+    // Detect module pixel size
+    let moduleSize = 1, inRun = false;
+    for (let x = 0; x < baseSize; x++) {
+      if (isModule[x] && !inRun)       { inRun = true; moduleSize = 1; }
+      else if (isModule[x] && inRun)   { moduleSize++; }
+      else if (!isModule[x] && inRun)  { break; }
+    }
+    moduleSize = Math.max(1, moduleSize);
+
     const out    = document.getElementById('output-canvas');
-    out.width    = size;
-    out.height   = size;
+    out.width = out.height = size;
     const outCtx = out.getContext('2d');
     outCtx.clearRect(0, 0, size, size);
-    outCtx.imageSmoothingEnabled = false;
-    outCtx.drawImage(tmp, 0, 0, size, size);
+    outCtx.fillStyle = fg;
+
+    const scale = size / baseSize;
+    const mPx   = moduleSize * scale;
+    const r     = (radius / 100) * (mPx / 2);
+    const gap   = radius > 0 ? mPx * 0.1 : 0;
+
+    if (radius === 0) {
+      // Fast pixel path
+      for (let i = 0; i < d.length; i += 4) {
+        if (isModule[i/4]) {
+          d[i] = tr; d[i+1] = tg; d[i+2] = tb; d[i+3] = 255;
+        } else {
+          d[i+3] = 0;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+      outCtx.imageSmoothingEnabled = false;
+      outCtx.drawImage(tmp, 0, 0, size, size);
+    } else {
+      // Rounded rect path
+      for (let py = 0; py < baseSize; py += moduleSize) {
+        for (let px = 0; px < baseSize; px += moduleSize) {
+          if (!isModule[py * baseSize + px]) continue;
+          roundRect(outCtx, px * scale + gap/2, py * scale + gap/2, mPx - gap, mPx - gap, r);
+        }
+      }
+      outCtx.fill();
+    }
+
+    // Reset copy btn
+    const cb = document.getElementById('copy-btn');
+    cb.textContent = '⎘ Копировать';
+    cb.classList.remove('copied');
 
     document.getElementById('preview-area').classList.add('visible');
     document.getElementById('size-note').textContent = `${size} × ${size} px`;
@@ -337,14 +583,58 @@ function generate() {
   }, 200);
 }
 
+/* ══ DOWNLOAD ══ */
 function download() {
-  const canvas = document.getElementById('output-canvas');
   const a = document.createElement('a');
   a.download = 'qr-code.png';
-  a.href = canvas.toDataURL('image/png');
+  a.href = document.getElementById('output-canvas').toDataURL('image/png');
   a.click();
 }
 
+/* ══ COPY TO CLIPBOARD ══ */
+function copyToClipboard() {
+  const canvas = document.getElementById('output-canvas');
+  const btn    = document.getElementById('copy-btn');
+
+  canvas.toBlob(blob => {
+    if (!blob) { showCopyState(btn, 'error'); return; }
+    if (navigator.clipboard && navigator.clipboard.write) {
+      try {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+          .then(() => showCopyState(btn, 'ok'))
+          .catch(() => fallbackCopy(canvas, btn));
+      } catch(e) { fallbackCopy(canvas, btn); }
+    } else {
+      fallbackCopy(canvas, btn);
+    }
+  }, 'image/png');
+}
+
+function showCopyState(btn, state) {
+  if (state === 'ok') {
+    btn.textContent = '✓ Скопировано';
+    btn.classList.add('copied');
+  } else {
+    btn.textContent = '✗ Ошибка';
+  }
+  setTimeout(() => {
+    btn.textContent = '⎘ Копировать';
+    btn.classList.remove('copied');
+  }, 2200);
+}
+
+function fallbackCopy(canvas, btn) {
+  const w = window.open('');
+  if (w) {
+    w.document.write('<body style="margin:0;background:#111"><img src="' + canvas.toDataURL() + '" style="max-width:100%;display:block"></body>');
+    btn.textContent = '↗ Открыто в табе';
+    setTimeout(() => { btn.textContent = '⎘ Копировать'; }, 2500);
+  } else {
+    showCopyState(btn, 'error');
+  }
+}
+
+/* ══ KEYBOARD ══ */
 document.getElementById('url-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') generate();
 });
