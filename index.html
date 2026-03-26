@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR Generator</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e0e'/%3E%3Crect x='4' y='4' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='6' y='6' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='18' y='4' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='20' y='6' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='4' y='18' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='6' y='20' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='18' y='18' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='24' y='18' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='18' y='24' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='24' y='24' width='4' height='4' fill='%23e8ff47'/%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
@@ -206,7 +206,6 @@
     background-color: var(--checker-b); z-index: 0; transition: background-color 0.25s;
   }
   #output-canvas { position: relative; z-index: 1; display: block; max-width: 280px; max-height: 280px; width: 100%; height: auto; }
-  #qr-hidden { position: absolute; left: -9999px; top: -9999px; }
   .size-note { font-size: 11px; color: var(--muted); text-align: center; }
 
   /* ══ Readability badge ══ */
@@ -430,8 +429,6 @@
   </div>
 </div>
 
-<div id="qr-hidden"></div>
-
 <script>
 /* ══ THEME ══ */
 const html = document.documentElement;
@@ -496,54 +493,67 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-/* Extract QR module matrix from rendered canvas */
-function extractModuleMatrix(srcCanvas) {
-  const baseSize = srcCanvas.width;
-  const tmp = document.createElement('canvas');
-  tmp.width = tmp.height = baseSize;
-  const ctx = tmp.getContext('2d');
-  ctx.drawImage(srcCanvas, 0, 0);
-  const d = ctx.getImageData(0, 0, baseSize, baseSize).data;
-
-  // Find quiet zone start: first dark pixel row
-  let firstRow = 0;
-  outer: for (let y = 0; y < baseSize; y++) {
-    for (let x = 0; x < baseSize; x++) {
-      if (d[(y*baseSize+x)*4] < 128) { firstRow = y; break outer; }
+/* Get QR module matrix directly — no pixel parsing needed */
+function getQRMatrix(text, ecLevel) {
+  // qrcode-generator uses: 0=L,1=M,2=Q,3=H
+  const ecMap = { L: 'L', M: 'M', Q: 'Q', H: 'H' };
+  const qr = qrcode(0, ecMap[ecLevel] || 'M');
+  qr.addData(text);
+  qr.make();
+  const count = qr.getModuleCount();
+  const matrix = [];
+  for (let r = 0; r < count; r++) {
+    matrix.push(new Uint8Array(count));
+    for (let c = 0; c < count; c++) {
+      matrix[r][c] = qr.isDark(r, c) ? 1 : 0;
     }
   }
+  return { matrix, moduleCount: count };
+}
 
-  // Detect module pixel size by counting continuous dark pixels from first dark row
-  let mSize = 0;
-  for (let x = 0; x < baseSize; x++) {
-    if (d[(firstRow*baseSize+x)*4] < 128) mSize++;
-    else if (mSize > 0) break;
-  }
-  mSize = Math.max(1, mSize);
-
-  // Find quiet zone offset
-  let quietX = 0;
-  for (let x = 0; x < baseSize; x++) {
-    if (d[(firstRow*baseSize+x)*4] < 128) { quietX = x; break; }
-  }
-  let quietY = firstRow;
-
-  const moduleCount = Math.round((baseSize - quietX*2) / mSize);
-  const matrix = [];
-  for (let my = 0; my < moduleCount; my++) {
-    matrix.push(new Uint8Array(moduleCount));
-    for (let mx = 0; mx < moduleCount; mx++) {
-      const px = quietX + mx*mSize + Math.floor(mSize/2);
-      const py = quietY + my*mSize + Math.floor(mSize/2);
-      if (px < baseSize && py < baseSize) {
-        matrix[my][mx] = d[(py*baseSize+px)*4] < 128 ? 1 : 0;
+/* Render QR to a new offscreen canvas (for batch) */
+function renderQRToOffscreen(matrix, moduleCount, color, radiusPct, sz) {
+  const offscreen = document.createElement('canvas');
+  offscreen.width = offscreen.height = sz;
+  const ctx = offscreen.getContext('2d');
+  ctx.clearRect(0, 0, sz, sz);
+  const [tr, tg, tb] = hexToRgb(color);
+  const mPx = sz / moduleCount;
+  const r   = (radiusPct / 100) * (mPx / 2);
+  const gap = radiusPct > 0 ? mPx * 0.08 : 0;
+  ctx.fillStyle = color;
+  if (radiusPct === 0) {
+    const imgData = ctx.createImageData(sz, sz);
+    const d = imgData.data;
+    for (let my = 0; my < moduleCount; my++) {
+      for (let mx = 0; mx < moduleCount; mx++) {
+        if (!matrix[my][mx]) continue;
+        const startX = Math.round(mx * mPx);
+        const startY = Math.round(my * mPx);
+        const endX   = Math.round((mx+1) * mPx);
+        const endY   = Math.round((my+1) * mPx);
+        for (let py = startY; py < endY && py < sz; py++) {
+          for (let px = startX; px < endX && px < sz; px++) {
+            const idx = (py*sz+px)*4;
+            d[idx]=tr; d[idx+1]=tg; d[idx+2]=tb; d[idx+3]=255;
+          }
+        }
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  } else {
+    for (let my = 0; my < moduleCount; my++) {
+      for (let mx = 0; mx < moduleCount; mx++) {
+        if (!matrix[my][mx]) continue;
+        roundRect(ctx, mx*mPx + gap/2, my*mPx + gap/2, mPx-gap, mPx-gap, r);
+        ctx.fill();
       }
     }
   }
-  return { matrix, moduleCount, mSize, quietX, quietY };
+  return offscreen;
 }
 
-/* Render QR to canvas from module matrix */
+
 function renderQR(matrix, size, fg, radiusPct, moduleCount) {
   const out = document.getElementById('output-canvas');
   out.width = out.height = size;
@@ -655,42 +665,32 @@ function generate() {
 
   lastFg = fg; lastSize = size;
 
-  const hidden = document.getElementById('qr-hidden');
-  hidden.innerHTML = '';
-  const baseSize = 512;
-
+  let matrix, moduleCount;
   try {
-    new QRCode(hidden, { text: url, width: baseSize, height: baseSize, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel[ec] });
+    ({ matrix, moduleCount } = getQRMatrix(url, ec));
   } catch(e) { alert('Ошибка генерации: ' + e.message); return; }
 
-  setTimeout(() => {
-    const srcCanvas = hidden.querySelector('canvas');
-    if (!srcCanvas) { alert('Не удалось создать QR'); return; }
+  lastQRData = matrix; lastModuleCount = moduleCount;
 
-    const { matrix, moduleCount } = extractModuleMatrix(srcCanvas);
-    lastQRData = matrix; lastModuleCount = moduleCount;
-
-    if (format === 'svg') {
-      // Render to canvas for preview only
-      const svgStr = buildSVG(matrix, moduleCount, fg, radius);
-      const img = new Image();
-      const blob = new Blob([svgStr], {type:'image/svg+xml'});
-      const blobUrl = URL.createObjectURL(blob);
-      img.onload = () => {
-        const out = document.getElementById('output-canvas');
-        out.width = out.height = size;
-        const ctx = out.getContext('2d');
-        ctx.clearRect(0,0,size,size);
-        ctx.drawImage(img, 0, 0, size, size);
-        URL.revokeObjectURL(blobUrl);
-        finalizeSingle(fg, moduleCount, size, 'SVG');
-      };
-      img.src = blobUrl;
-    } else {
-      renderQR(matrix, size, fg, radius, moduleCount);
-      finalizeSingle(fg, moduleCount, size, 'PNG');
-    }
-  }, 150);
+  if (format === 'svg') {
+    const svgStr = buildSVG(matrix, moduleCount, fg, radius);
+    const img = new Image();
+    const blob = new Blob([svgStr], {type:'image/svg+xml'});
+    const blobUrl = URL.createObjectURL(blob);
+    img.onload = () => {
+      const out = document.getElementById('output-canvas');
+      out.width = out.height = size;
+      const ctx = out.getContext('2d');
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+      URL.revokeObjectURL(blobUrl);
+      finalizeSingle(fg, moduleCount, size, 'SVG');
+    };
+    img.src = blobUrl;
+  } else {
+    renderQR(matrix, size, fg, radius, moduleCount);
+    finalizeSingle(fg, moduleCount, size, 'PNG');
+  }
 }
 
 function finalizeSingle(fg, moduleCount, size, fmt) {
@@ -783,15 +783,35 @@ function renderBatchList() {
   batchRows.forEach(row => {
     const div = document.createElement('div');
     div.className = 'batch-url-row';
-    div.innerHTML = `
-      <input type="text" placeholder="https://example.com" value="${escHtml(row.url)}" 
-        oninput="updateBatchRow(${row.id},'url',this.value)"
-        autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
-      <div class="batch-color-swatch" title="Цвет QR">
-        <input type="color" value="${row.color}" oninput="updateBatchRow(${row.id},'color',this.value)">
-      </div>
-      <button class="batch-remove" onclick="removeBatchRow(${row.id})" title="Удалить">×</button>
-    `;
+
+    const urlInput = document.createElement('input');
+    urlInput.type = 'text';
+    urlInput.placeholder = 'https://example.com';
+    urlInput.value = row.url;
+    urlInput.autocomplete = 'off';
+    urlInput.autocorrect = 'off';
+    urlInput.autocapitalize = 'none';
+    urlInput.spellcheck = false;
+    urlInput.addEventListener('input', () => updateBatchRow(row.id, 'url', urlInput.value));
+
+    const swatchWrap = document.createElement('div');
+    swatchWrap.className = 'batch-color-swatch';
+    swatchWrap.title = 'Цвет QR';
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = row.color;
+    colorInput.addEventListener('input', () => updateBatchRow(row.id, 'color', colorInput.value));
+    swatchWrap.appendChild(colorInput);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'batch-remove';
+    removeBtn.title = 'Удалить';
+    removeBtn.textContent = '×';
+    removeBtn.addEventListener('click', () => removeBatchRow(row.id));
+
+    div.appendChild(urlInput);
+    div.appendChild(swatchWrap);
+    div.appendChild(removeBtn);
     container.appendChild(div);
   });
 }
@@ -830,100 +850,88 @@ function generateBatch() {
   resultsDiv.innerHTML = `<p style="font-size:12px;color:var(--muted);letter-spacing:0.05em;">Генерация...</p>`;
 
   const cards = [];
-  let processed = 0;
 
-  function processNext(i) {
-    if (i >= rows.length) {
-      renderBatchResults(cards, format);
-      return;
-    }
-    const row = rows[i];
-    const hidden = document.getElementById('qr-hidden');
-    hidden.innerHTML = '';
+  rows.forEach(row => {
+    let matrix, moduleCount;
     try {
-      new QRCode(hidden, { text: row.url, width: 512, height: 512, colorDark:'#000000', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel[ec] });
-    } catch(e) { processNext(i+1); return; }
+      ({ matrix, moduleCount } = getQRMatrix(row.url, ec));
+    } catch(e) { return; }
 
-    setTimeout(() => {
-      const srcCanvas = hidden.querySelector('canvas');
-      if (!srcCanvas) { processNext(i+1); return; }
-      const { matrix, moduleCount } = extractModuleMatrix(srcCanvas);
+    const offscreen = renderQRToOffscreen(matrix, moduleCount, row.color, radius, size);
+    const read = checkReadability(row.color, moduleCount);
+    const svgStr = format === 'svg' ? buildSVG(matrix, moduleCount, row.color, radius) : null;
+    cards.push({ url: row.url, color: row.color, canvas: offscreen, svgStr, read, format });
+  });
 
-      // Render to offscreen canvas for PNG / preview
-      const offscreen = document.createElement('canvas');
-      offscreen.width = offscreen.height = size;
-      const ctx = offscreen.getContext('2d');
-      ctx.clearRect(0,0,size,size);
-
-      // Temporarily swap output canvas
-      const realOut = document.getElementById('output-canvas');
-      const savedId = realOut.id;
-      realOut.id = '__saved__';
-      offscreen.id = 'output-canvas';
-      document.body.appendChild(offscreen);
-
-      renderQR(matrix, size, row.color, radius, moduleCount);
-
-      offscreen.id = '';
-      realOut.id = savedId;
-      document.body.removeChild(offscreen);
-
-      const read = checkReadability(row.color, moduleCount);
-      const svgStr = format === 'svg' ? buildSVG(matrix, moduleCount, row.color, radius) : null;
-      cards.push({ url: row.url, color: row.color, canvas: offscreen, svgStr, read, format });
-      processNext(i+1);
-    }, 150);
-  }
-  processNext(0);
+  renderBatchResults(cards, format);
 }
 
 function renderBatchResults(cards, format) {
   const resultsDiv = document.getElementById('batch-results');
-  resultsDiv.innerHTML = `
-    <div class="batch-header">
-      <span class="batch-header-title">${cards.length} QR готово</span>
-      <button class="batch-dl-all-btn" onclick="downloadAll()">↓ Скачать все</button>
-    </div>
-    <div class="batch-result-grid" id="batch-grid"></div>
+  resultsDiv.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'batch-header';
+  header.innerHTML = `
+    <span class="batch-header-title">${cards.length} QR готово</span>
+    <button class="batch-dl-all-btn" onclick="downloadAll()">↓ Скачать все</button>
   `;
-  const grid = document.getElementById('batch-grid');
+  resultsDiv.appendChild(header);
+
+  const grid = document.createElement('div');
+  grid.className = 'batch-result-grid';
+  grid.id = 'batch-grid';
+  resultsDiv.appendChild(grid);
+
   window._batchCards = cards;
 
   cards.forEach((card, i) => {
     const div = document.createElement('div');
     div.className = 'batch-card';
 
+    // Canvas wrap
     const wrap = document.createElement('div');
     wrap.className = 'batch-card-canvas-wrap';
-    wrap.appendChild(card.canvas);
     card.canvas.style.cssText = 'position:relative;z-index:1;width:100%;height:100%;display:block;';
+    wrap.appendChild(card.canvas);
+    div.appendChild(wrap);
 
+    // Color row
+    const colorRow = document.createElement('div');
+    colorRow.className = 'batch-card-color';
+    colorRow.innerHTML = `<div class="batch-color-dot" style="background:${card.color}"></div><span>${card.color.toUpperCase()}</span>`;
+    div.appendChild(colorRow);
+
+    // URL label
     const shortUrl = card.url.replace(/^https?:\/\//,'').slice(0,40) + (card.url.length>47?'…':'');
-    const colorName = card.color.toUpperCase();
+    const urlEl = document.createElement('div');
+    urlEl.className = 'batch-card-url';
+    urlEl.title = card.url;
+    urlEl.textContent = shortUrl;
+    div.appendChild(urlEl);
 
-    div.innerHTML = `
-      <div class="batch-card-color">
-        <div class="batch-color-dot" style="background:${card.color}"></div>
-        <span>${colorName}</span>
-      </div>
-    `;
-    div.insertBefore(wrap, div.firstChild);
-    div.innerHTML += `
-      <div class="batch-card-url" title="${escHtml(card.url)}">${escHtml(shortUrl)}</div>
-      <div class="batch-readability ${card.read.level}">${card.read.icon} ${card.read.text.split('—')[0].trim()}</div>
-      <div class="batch-card-actions">
-        <button class="batch-dl-btn" onclick="downloadCard(${i})">↓ ${format.toUpperCase()}</button>
-        <button class="batch-dl-btn" onclick="copyCard(${i})">⎘ Copy</button>
-      </div>
-    `;
-    // Re-insert canvas
-    const insertedWrap = div.querySelector('.batch-card-canvas-wrap');
-    if (!insertedWrap) {
-      div.insertBefore(wrap, div.children[1]);
-    }
+    // Readability
+    const readEl = document.createElement('div');
+    readEl.className = `batch-readability ${card.read.level}`;
+    readEl.textContent = `${card.read.icon} ${card.read.text.split('—')[0].trim()}`;
+    div.appendChild(readEl);
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'batch-card-actions';
+    const dlBtn = document.createElement('button');
+    dlBtn.className = 'batch-dl-btn';
+    dlBtn.textContent = `↓ ${format.toUpperCase()}`;
+    dlBtn.onclick = () => downloadCard(i);
+    const cpBtn = document.createElement('button');
+    cpBtn.className = 'batch-dl-btn';
+    cpBtn.textContent = '⎘ Copy';
+    cpBtn.onclick = () => copyCard(i);
+    actions.appendChild(dlBtn);
+    actions.appendChild(cpBtn);
+    div.appendChild(actions);
+
     grid.appendChild(div);
-    // Append canvas to its wrap
-    div.querySelectorAll('.batch-card-canvas-wrap')[0].appendChild(card.canvas);
   });
 }
 
