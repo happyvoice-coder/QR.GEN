@@ -5,82 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230e0e0e'/%3E%3Crect x='4' y='4' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='6' y='6' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='18' y='4' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='20' y='6' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='4' y='18' width='10' height='10' rx='1.5' fill='%23e8ff47'/%3E%3Crect x='6' y='20' width='6' height='6' rx='0.5' fill='%230e0e0e'/%3E%3Crect x='18' y='18' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='24' y='18' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='18' y='24' width='4' height='4' fill='%23e8ff47'/%3E%3Crect x='24' y='24' width='4' height='4' fill='%23e8ff47'/%3E%3C/svg%3E">
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   [data-theme="dark"] {
-    --bg: #0e0e0e;
-    --surface: #161616;
-    --border: #2a2a2a;
-    --text: #f0f0f0;
-    --muted: #666;
-    --checker-a: #333;
-    --checker-b: #1e1e1e;
-    --dl-hover: rgba(232,255,71,0.08);
-    --h1-dot: #e8ff47;
-    --btn-bg: #e8ff47;
-    --btn-fg: #0e0e0e;
-    --action-color: #e8ff47;
+    --bg: #0e0e0e; --surface: #161616; --surface2: #1e1e1e;
+    --border: #2a2a2a; --text: #f0f0f0; --muted: #666;
+    --checker-a: #333; --checker-b: #1e1e1e;
+    --dl-hover: rgba(232,255,71,0.08); --h1-dot: #e8ff47;
+    --btn-bg: #e8ff47; --btn-fg: #0e0e0e; --action-color: #e8ff47;
+    --tab-active-bg: #e8ff47; --tab-active-fg: #0e0e0e;
+    --badge-ok: #4caf50; --badge-warn: #ff9800; --badge-err: #f44336;
   }
-
   [data-theme="light"] {
-    --bg: #f0ede6;
-    --surface: #ffffff;
-    --border: #e0ddd6;
-    --text: #1a1a1a;
-    --muted: #999;
-    --checker-a: #ccc;
-    --checker-b: #e8e8e8;
-    --dl-hover: rgba(26,26,26,0.06);
-    --h1-dot: #e8a000;
-    --btn-bg: #1a1a1a;
-    --btn-fg: #f0ede6;
-    --action-color: #1a1a1a;
+    --bg: #f0ede6; --surface: #ffffff; --surface2: #f7f5f0;
+    --border: #e0ddd6; --text: #1a1a1a; --muted: #999;
+    --checker-a: #ccc; --checker-b: #e8e8e8;
+    --dl-hover: rgba(26,26,26,0.06); --h1-dot: #e8a000;
+    --btn-bg: #1a1a1a; --btn-fg: #f0ede6; --action-color: #1a1a1a;
+    --tab-active-bg: #1a1a1a; --tab-active-fg: #f0ede6;
+    --badge-ok: #2e7d32; --badge-warn: #e65100; --badge-err: #c62828;
   }
 
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 16px;
-    transition: background 0.25s, color 0.25s;
+    min-height: 100vh; display: flex;
+    align-items: center; justify-content: center;
+    padding: 32px 16px; transition: background 0.25s, color 0.25s;
   }
 
-  /* ══ THEME TOGGLE — fixed pill, top-right ══ */
   .theme-toggle {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 999;
-    /* Override all button defaults */
-    width: auto !important;
-    margin-bottom: 0 !important;
+    position: fixed; top: 16px; right: 16px; z-index: 999;
+    width: auto !important; margin-bottom: 0 !important;
     padding: 8px 14px !important;
-    background: var(--surface) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 999px !important;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 400;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
+    background: var(--surface) !important; color: var(--text) !important;
+    border: 1px solid var(--border) !important; border-radius: 999px !important;
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 400;
+    letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   }
   .theme-toggle:hover { opacity: 0.8; transform: none !important; }
@@ -89,238 +56,228 @@
 
   /* ══ Layout ══ */
   .wrap { width: 100%; max-width: 480px; }
-  header { margin-bottom: 40px; }
-
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2rem, 8vw, 3rem);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.03em;
-  }
+  header { margin-bottom: 32px; }
+  h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 8vw, 3rem); font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
   h1 span { color: var(--h1-dot); transition: color 0.25s; }
+  .sub { margin-top: 8px; color: var(--muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
 
-  .sub {
-    margin-top: 8px;
-    color: var(--muted);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  /* ══ Tabs ══ */
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border); border-radius: 6px;
+    overflow: hidden; margin-bottom: 24px;
+    background: var(--surface2);
+  }
+  .tab-btn {
+    background: transparent !important; color: var(--muted) !important;
+    border: none !important; border-radius: 0 !important;
+    margin-bottom: 0 !important; padding: 10px 8px !important;
+    font-size: 12px !important; letter-spacing: 0.06em;
+    text-transform: uppercase; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: 'DM Mono', monospace !important;
+  }
+  .tab-btn:hover { background: var(--dl-hover) !important; opacity: 1; transform: none !important; }
+  .tab-btn.active {
+    background: var(--tab-active-bg) !important;
+    color: var(--tab-active-fg) !important;
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 700 !important;
   }
 
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ══ Fields ══ */
   .field { margin-bottom: 16px; }
-
-  label {
-    display: block;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-
-  input[type="text"],
-  input[type="number"],
-  select {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    padding: 12px 14px;
-    outline: none;
+  label { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 14px; padding: 12px 14px; outline: none;
     transition: border-color 0.15s, background 0.25s, color 0.25s;
-    -webkit-appearance: none;
-    appearance: none;
+    -webkit-appearance: none; appearance: none;
   }
-  input[type="text"]:focus,
-  input[type="number"]:focus,
-  select:focus { border-color: var(--text); }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--text); }
+  textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
 
   select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
   }
-
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 
   .color-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 14px;
-    cursor: pointer;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; padding: 10px 14px; cursor: pointer;
     transition: border-color 0.15s, background 0.25s;
   }
   .color-wrap:focus-within { border-color: var(--text); }
-
-  input[type="color"] {
-    width: 28px; height: 28px;
-    border: none; background: none; padding: 0;
-    cursor: pointer; border-radius: 2px;
-    -webkit-appearance: none;
-  }
+  input[type="color"] { width: 28px; height: 28px; border: none; background: none; padding: 0; cursor: pointer; border-radius: 2px; -webkit-appearance: none; }
   input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
   input[type="color"]::-webkit-color-swatch { border: none; border-radius: 2px; }
-
   .color-val { font-size: 13px; color: var(--text); flex: 1; text-transform: uppercase; transition: color 0.25s; }
 
-  /* ══ Radius slider ══ */
-  .radius-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
+  /* ══ Radius ══ */
+  .radius-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .radius-header label { margin-bottom: 0; }
-
   .radius-preview { display: flex; gap: 6px; align-items: center; }
-
-  .rp-box {
-    width: 14px; height: 14px;
-    background: var(--text);
-    transition: border-radius 0.15s, background 0.25s;
-    flex-shrink: 0;
-  }
-
+  .rp-box { width: 14px; height: 14px; background: var(--text); transition: border-radius 0.08s, background 0.25s; flex-shrink: 0; }
   .radius-pct { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; min-width: 28px; text-align: right; }
+  input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 2px; background: var(--border); border-radius: 1px; outline: none; cursor: pointer; transition: background 0.25s; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--btn-bg); cursor: pointer; transition: background 0.25s; }
+  input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--btn-bg); border: none; cursor: pointer; }
 
-  input[type="range"] {
-    width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 2px;
-    background: var(--border);
-    border-radius: 1px;
-    outline: none;
-    cursor: pointer;
-    transition: background 0.25s;
+  /* ══ Format selector ══ */
+  .format-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .fmt-btn {
+    background: var(--surface) !important; color: var(--muted) !important;
+    border: 1px solid var(--border) !important; border-radius: 4px !important;
+    margin-bottom: 0 !important; padding: 10px !important;
+    font-size: 11px !important; letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; font-family: 'DM Mono', monospace !important;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
   }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: var(--btn-bg);
-    cursor: pointer;
-    transition: background 0.25s;
-  }
-  input[type="range"]::-moz-range-thumb {
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: var(--btn-bg);
-    border: none;
-    cursor: pointer;
-  }
+  .fmt-btn:hover { background: var(--dl-hover) !important; opacity: 1; transform: none !important; }
+  .fmt-btn.active { border-color: var(--text) !important; color: var(--text) !important; background: var(--dl-hover) !important; }
 
   /* ══ Main button ══ */
   button {
-    width: 100%;
-    padding: 14px;
-    background: var(--btn-bg);
-    color: var(--btn-fg);
-    border: none;
-    border-radius: 4px;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s, background 0.25s, color 0.25s;
-    margin-bottom: 24px;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
+    width: 100%; padding: 14px; background: var(--btn-bg); color: var(--btn-fg);
+    border: none; border-radius: 4px; font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    cursor: pointer; transition: opacity 0.15s, transform 0.1s, background 0.25s, color 0.25s;
+    margin-bottom: 24px; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   }
   button:hover { opacity: 0.88; }
   button:active { transform: scale(0.99); }
 
-  /* ══ Preview ══ */
+  /* ══ Batch URL list ══ */
+  .batch-url-row {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 8px;
+  }
+  .batch-url-row input[type="text"] { flex: 1; margin-bottom: 0; }
+  .batch-color-swatch {
+    width: 36px; height: 44px; border-radius: 4px; border: 1px solid var(--border);
+    cursor: pointer; flex-shrink: 0; padding: 0; background: none;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .batch-color-swatch input[type="color"] { width: 100%; height: 100%; border: none; padding: 0; cursor: pointer; }
+  .batch-remove {
+    width: 32px !important; height: 44px !important; padding: 0 !important;
+    font-size: 16px !important; background: transparent !important;
+    color: var(--muted) !important; border: 1px solid var(--border) !important;
+    border-radius: 4px !important; margin-bottom: 0 !important;
+    flex-shrink: 0; font-family: monospace !important;
+    transition: color 0.15s, border-color 0.15s !important;
+  }
+  .batch-remove:hover { color: var(--badge-err) !important; border-color: var(--badge-err) !important; opacity: 1; transform: none !important; }
+
+  .batch-add-btn {
+    background: transparent !important; border: 1px dashed var(--border) !important;
+    color: var(--muted) !important; font-size: 12px !important;
+    font-family: 'DM Mono', monospace !important;
+    font-weight: 400 !important; letter-spacing: 0.05em;
+    margin-bottom: 0 !important;
+    transition: border-color 0.15s, color 0.15s !important;
+  }
+  .batch-add-btn:hover { border-color: var(--text) !important; color: var(--text) !important; opacity: 1; transform: none !important; }
+
+  .batch-hint { font-size: 11px; color: var(--muted); margin-bottom: 16px; letter-spacing: 0.04em; }
+
+  /* ══ Preview (single) ══ */
   #preview-area {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding: 28px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
+    display: none; flex-direction: column; align-items: center;
+    gap: 16px; padding: 28px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 4px;
     transition: background 0.25s, border-color 0.25s;
   }
   #preview-area.visible { display: flex; }
 
-  .preview-label {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    align-self: flex-start;
-  }
+  .preview-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); align-self: flex-start; }
 
-  .canvas-container {
-    position: relative;
-    border-radius: 2px;
-    overflow: hidden;
-  }
+  .canvas-container { position: relative; border-radius: 2px; overflow: hidden; }
   .canvas-container::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(45deg, var(--checker-a) 25%, transparent 25%),
-      linear-gradient(-45deg, var(--checker-a) 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, var(--checker-a) 75%),
-      linear-gradient(-45deg, transparent 75%, var(--checker-a) 75%);
-    background-size: 12px 12px;
-    background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
-    background-color: var(--checker-b);
-    z-index: 0;
-    transition: background-color 0.25s;
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(45deg, var(--checker-a) 25%, transparent 25%), linear-gradient(-45deg, var(--checker-a) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--checker-a) 75%), linear-gradient(-45deg, transparent 75%, var(--checker-a) 75%);
+    background-size: 12px 12px; background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+    background-color: var(--checker-b); z-index: 0; transition: background-color 0.25s;
   }
-  #output-canvas {
-    position: relative; z-index: 1;
-    display: block;
-    max-width: 280px; max-height: 280px;
-    width: 100%; height: auto;
-  }
-
+  #output-canvas { position: relative; z-index: 1; display: block; max-width: 280px; max-height: 280px; width: 100%; height: auto; }
   #qr-hidden { position: absolute; left: -9999px; top: -9999px; }
-
   .size-note { font-size: 11px; color: var(--muted); text-align: center; }
 
-  /* ══ Action buttons ══ */
-  .action-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    width: 100%;
+  /* ══ Readability badge ══ */
+  .readability-badge {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 4px; font-size: 12px;
+    letter-spacing: 0.05em; width: 100%;
+    border: 1px solid currentColor;
   }
+  .readability-badge.ok { color: var(--badge-ok); background: color-mix(in srgb, var(--badge-ok) 10%, transparent); }
+  .readability-badge.warn { color: var(--badge-warn); background: color-mix(in srgb, var(--badge-warn) 10%, transparent); }
+  .readability-badge.err { color: var(--badge-err); background: color-mix(in srgb, var(--badge-err) 10%, transparent); }
+  .badge-icon { font-size: 14px; }
 
+  /* ══ Action buttons ══ */
+  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
   .action-btn {
-    background: transparent !important;
-    border: 1px solid var(--action-color) !important;
-    color: var(--action-color) !important;
-    margin-bottom: 0 !important;
-    font-size: 12px !important;
-    padding: 11px 8px !important;
+    background: transparent !important; border: 1px solid var(--action-color) !important;
+    color: var(--action-color) !important; margin-bottom: 0 !important;
+    font-size: 12px !important; padding: 11px 8px !important;
     font-family: 'Syne', sans-serif;
   }
   .action-btn:hover { background: var(--dl-hover) !important; opacity: 1; }
+  .copy-btn.copied { border-color: #4caf50 !important; color: #4caf50 !important; }
 
-  .copy-btn.copied {
-    border-color: #4caf50 !important;
-    color: #4caf50 !important;
+  /* ══ Batch results ══ */
+  #batch-results { margin-top: 24px; }
+  .batch-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+  .batch-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    transition: border-color 0.15s;
   }
+  .batch-card:hover { border-color: var(--text); }
+  .batch-card-canvas-wrap { position: relative; border-radius: 2px; overflow: hidden; aspect-ratio: 1; }
+  .batch-card-canvas-wrap::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(45deg, var(--checker-a) 25%, transparent 25%), linear-gradient(-45deg, var(--checker-a) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, var(--checker-a) 75%), linear-gradient(-45deg, transparent 75%, var(--checker-a) 75%);
+    background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    background-color: var(--checker-b); z-index: 0;
+  }
+  .batch-card-canvas-wrap canvas { position: relative; z-index: 1; width: 100%; height: 100%; display: block; }
+  .batch-card-url {
+    font-size: 10px; color: var(--muted); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; letter-spacing: 0.03em;
+  }
+  .batch-card-color { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+  .batch-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .batch-card-actions { display: flex; gap: 6px; }
+  .batch-dl-btn {
+    flex: 1; background: transparent !important; border: 1px solid var(--border) !important;
+    color: var(--muted) !important; font-size: 10px !important; padding: 7px 4px !important;
+    letter-spacing: 0.05em; margin-bottom: 0 !important;
+    font-family: 'DM Mono', monospace !important;
+    transition: border-color 0.15s, color 0.15s !important;
+  }
+  .batch-dl-btn:hover { border-color: var(--text) !important; color: var(--text) !important; opacity: 1; transform: none !important; }
+  .batch-readability { font-size: 10px; letter-spacing: 0.04em; }
+  .batch-readability.ok { color: var(--badge-ok); }
+  .batch-readability.warn { color: var(--badge-warn); }
+  .batch-readability.err { color: var(--badge-err); }
+
+  .batch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .batch-header-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .batch-dl-all-btn {
+    background: transparent !important; border: 1px solid var(--action-color) !important;
+    color: var(--action-color) !important; font-size: 11px !important;
+    padding: 8px 12px !important; margin-bottom: 0 !important; width: auto !important;
+    font-family: 'DM Mono', monospace !important; letter-spacing: 0.05em;
+  }
+  .batch-dl-all-btn:hover { background: var(--dl-hover) !important; opacity: 1; transform: none !important; }
 
   /* ══ Mobile ══ */
   @media (max-width: 480px) {
@@ -332,7 +289,9 @@
   }
   @media (max-width: 360px) {
     .row { grid-template-columns: 1fr; }
+    .row-3 { grid-template-columns: 1fr 1fr; }
     .action-row { grid-template-columns: 1fr; }
+    .batch-result-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -346,62 +305,128 @@
 <div class="wrap">
   <header>
     <h1>QR<span>.</span>gen</h1>
-    <p class="sub">PNG с прозрачным фоном</p>
+    <p class="sub">PNG · SVG · Батч</p>
   </header>
 
-  <div class="field">
-    <label>URL или текст</label>
-    <input type="text" id="url-input" placeholder="https://example.com"
-      inputmode="url" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+  <!-- ══ TABS ══ -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('single')">Один QR</button>
+    <button class="tab-btn" onclick="switchTab('batch')">↓ Список</button>
   </div>
 
-  <div class="row">
+  <!-- ══ SINGLE TAB ══ -->
+  <div class="tab-panel active" id="panel-single">
     <div class="field">
-      <label>Цвет модулей</label>
-      <div class="color-wrap">
-        <input type="color" id="fg-color" value="#000000">
-        <span class="color-val" id="fg-val">#000000</span>
+      <label>URL или текст</label>
+      <input type="text" id="url-input" placeholder="https://example.com"
+        inputmode="url" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Цвет модулей</label>
+        <div class="color-wrap">
+          <input type="color" id="fg-color" value="#000000">
+          <span class="color-val" id="fg-val">#000000</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Размер (px)</label>
+        <input type="number" id="size-input" value="512" min="128" max="2048" step="64" inputmode="numeric">
       </div>
     </div>
-    <div class="field">
-      <label>Размер (px)</label>
-      <input type="number" id="size-input" value="512" min="128" max="2048" step="64" inputmode="numeric">
-    </div>
-  </div>
 
-  <div class="field">
-    <label>Коррекция ошибок</label>
-    <select id="ec-level">
-      <option value="L">L — низкая (7%)</option>
-      <option value="M" selected>M — средняя (15%)</option>
-      <option value="Q">Q — высокая (25%)</option>
-      <option value="H">H — максимальная (30%)</option>
-    </select>
-  </div>
-
-  <div class="field" style="margin-bottom:24px;">
-    <div class="radius-header">
-      <label>Скругление модулей</label>
-      <div class="radius-preview">
-        <div class="rp-box" id="rp-box"></div>
-        <span class="radius-pct" id="radius-val">0%</span>
+    <div class="row">
+      <div class="field">
+        <label>Коррекция ошибок</label>
+        <select id="ec-level">
+          <option value="L">L — низкая (7%)</option>
+          <option value="M" selected>M — средняя (15%)</option>
+          <option value="Q">Q — высокая (25%)</option>
+          <option value="H">H — макс (30%)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Формат</label>
+        <select id="format-select">
+          <option value="png">PNG (прозрачный фон)</option>
+          <option value="svg">SVG (векторный)</option>
+        </select>
       </div>
     </div>
-    <input type="range" id="radius-input" min="0" max="50" value="0" step="1">
+
+    <div class="field" style="margin-bottom:24px;">
+      <div class="radius-header">
+        <label>Скругление модулей</label>
+        <div class="radius-preview">
+          <div class="rp-box" id="rp-box"></div>
+          <span class="radius-pct" id="radius-val">0%</span>
+        </div>
+      </div>
+      <input type="range" id="radius-input" min="0" max="50" value="0" step="1">
+    </div>
+
+    <button onclick="generate()">Сгенерировать</button>
+
+    <div id="preview-area">
+      <span class="preview-label">Предпросмотр (шахматка = прозрачность)</span>
+      <div class="canvas-container">
+        <canvas id="output-canvas"></canvas>
+      </div>
+      <div id="readability-result"></div>
+      <p class="size-note" id="size-note"></p>
+      <div class="action-row">
+        <button class="action-btn" onclick="download()">↓ Скачать</button>
+        <button class="action-btn copy-btn" id="copy-btn" onclick="copyToClipboard()">⎘ Копировать</button>
+      </div>
+    </div>
   </div>
 
-  <button onclick="generate()">Сгенерировать</button>
+  <!-- ══ BATCH TAB ══ -->
+  <div class="tab-panel" id="panel-batch">
+    <p class="batch-hint">Каждая ссылка → отдельный QR. Цвет виден прямо на карточке.</p>
 
-  <div id="preview-area">
-    <span class="preview-label">Предпросмотр (шахматка = прозрачность)</span>
-    <div class="canvas-container">
-      <canvas id="output-canvas"></canvas>
+    <div id="batch-url-list"></div>
+    <button class="batch-add-btn" onclick="addBatchRow()">+ Добавить URL</button>
+
+    <div style="height:16px;"></div>
+
+    <div class="row">
+      <div class="field">
+        <label>Коррекция ошибок</label>
+        <select id="batch-ec-level">
+          <option value="L">L — низкая</option>
+          <option value="M" selected>M — средняя</option>
+          <option value="Q">Q — высокая</option>
+          <option value="H">H — макс</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Скругление</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+          <input type="range" id="batch-radius-input" min="0" max="50" value="0" step="1" style="flex:1;">
+          <span class="radius-pct" id="batch-radius-val" style="min-width:32px;">0%</span>
+        </div>
+      </div>
     </div>
-    <p class="size-note" id="size-note"></p>
-    <div class="action-row">
-      <button class="action-btn" onclick="download()">↓ Скачать PNG</button>
-      <button class="action-btn copy-btn" id="copy-btn" onclick="copyToClipboard()">⎘ Копировать</button>
+
+    <div class="row">
+      <div class="field">
+        <label>Размер (px)</label>
+        <input type="number" id="batch-size-input" value="512" min="128" max="2048" step="64" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>Формат</label>
+        <select id="batch-format-select">
+          <option value="png">PNG</option>
+          <option value="svg">SVG</option>
+        </select>
+      </div>
     </div>
+
+    <button onclick="generateBatch()">Сгенерировать все</button>
+
+    <div id="batch-results"></div>
   </div>
 </div>
 
@@ -410,81 +435,214 @@
 <script>
 /* ══ THEME ══ */
 const html = document.documentElement;
-
 function renderThemeIcon(theme) {
-  const icon  = document.getElementById('theme-icon');
+  const icon = document.getElementById('theme-icon');
   const label = document.getElementById('theme-label');
   if (theme === 'dark') {
-    icon.innerHTML = `
-      <circle cx="8" cy="8" r="2.8" fill="currentColor"/>
-      <line x1="8" y1="1.5" x2="8" y2="3"    stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="8" y1="13"  x2="8" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="1.5" y1="8" x2="3"   y2="8"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="13"  y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="3.4" y1="3.4"   x2="4.4" y2="4.4"   stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="11.6" y1="11.6" x2="12.6" y2="12.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="12.6" y1="3.4"  x2="11.6" y2="4.4"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-      <line x1="4.4" y1="11.6"  x2="3.4" y2="12.6"  stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-    `;
+    icon.innerHTML = `<circle cx="8" cy="8" r="2.8" fill="currentColor"/><line x1="8" y1="1.5" x2="8" y2="3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="13" x2="8" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="1.5" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="13" y1="8" x2="14.5" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="3.4" y1="3.4" x2="4.4" y2="4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="11.6" y1="11.6" x2="12.6" y2="12.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="12.6" y1="3.4" x2="11.6" y2="4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="4.4" y1="11.6" x2="3.4" y2="12.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>`;
     label.textContent = 'День';
   } else {
     icon.innerHTML = `<path d="M12.5 9.5A5 5 0 0 1 6.5 3.5a.5.5 0 0 0-.6-.6A6 6 0 1 0 13.1 10.1a.5.5 0 0 0-.6-.6z" fill="currentColor"/>`;
     label.textContent = 'Ночь';
   }
 }
-
-function setTheme(t) {
-  html.setAttribute('data-theme', t);
-  renderThemeIcon(t);
-  localStorage.setItem('qr-theme', t);
-}
-
-function toggleTheme() {
-  setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-}
-
+function setTheme(t) { html.setAttribute('data-theme', t); renderThemeIcon(t); localStorage.setItem('qr-theme', t); }
+function toggleTheme() { setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
 setTheme(localStorage.getItem('qr-theme') || 'light');
+
+/* ══ TABS ══ */
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && name === 'single') || (i === 1 && name === 'batch')));
+  document.getElementById('panel-single').classList.toggle('active', name === 'single');
+  document.getElementById('panel-batch').classList.toggle('active', name === 'batch');
+}
 
 /* ══ COLOR INPUT ══ */
 const fgInput = document.getElementById('fg-color');
 const fgVal   = document.getElementById('fg-val');
 fgInput.addEventListener('input', () => { fgVal.textContent = fgInput.value.toUpperCase(); });
 
-/* ══ RADIUS SLIDER ══ */
-const radiusInput = document.getElementById('radius-input');
-const radiusValEl = document.getElementById('radius-val');
-const rpBox       = document.getElementById('rp-box');
+/* ══ RADIUS SLIDER → live preview ══ */
+const radiusInput  = document.getElementById('radius-input');
+const radiusValEl  = document.getElementById('radius-val');
+const rpBox        = document.getElementById('rp-box');
 
 radiusInput.addEventListener('input', () => {
   const v = radiusInput.value;
   radiusValEl.textContent = v + '%';
   rpBox.style.borderRadius = v + '%';
+  // Live re-render if preview is visible
+  if (document.getElementById('preview-area').classList.contains('visible')) {
+    renderQR(lastQRData, lastSize, lastFg, parseInt(v), lastModuleCount);
+  }
 });
 
-/* ══ GENERATE ══ */
+document.getElementById('batch-radius-input').addEventListener('input', function() {
+  document.getElementById('batch-radius-val').textContent = this.value + '%';
+});
+
+/* ══ QR CORE HELPERS ══ */
 function hexToRgb(hex) {
-  return [
-    parseInt(hex.slice(1,3), 16),
-    parseInt(hex.slice(3,5), 16),
-    parseInt(hex.slice(5,7), 16)
-  ];
+  return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
 }
 
 function roundRect(ctx, x, y, w, h, r) {
-  r = Math.min(r, w / 2, h / 2);
+  r = Math.min(r, w/2, h/2);
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y,     x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x,     y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x,     y,     x + r, y);
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w,y, x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h, x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h, x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y, x+r,y);
   ctx.closePath();
 }
 
+/* Extract QR module matrix from rendered canvas */
+function extractModuleMatrix(srcCanvas) {
+  const baseSize = srcCanvas.width;
+  const tmp = document.createElement('canvas');
+  tmp.width = tmp.height = baseSize;
+  const ctx = tmp.getContext('2d');
+  ctx.drawImage(srcCanvas, 0, 0);
+  const d = ctx.getImageData(0, 0, baseSize, baseSize).data;
+
+  // Find quiet zone start: first dark pixel row
+  let firstRow = 0;
+  outer: for (let y = 0; y < baseSize; y++) {
+    for (let x = 0; x < baseSize; x++) {
+      if (d[(y*baseSize+x)*4] < 128) { firstRow = y; break outer; }
+    }
+  }
+
+  // Detect module pixel size by counting continuous dark pixels from first dark row
+  let mSize = 0;
+  for (let x = 0; x < baseSize; x++) {
+    if (d[(firstRow*baseSize+x)*4] < 128) mSize++;
+    else if (mSize > 0) break;
+  }
+  mSize = Math.max(1, mSize);
+
+  // Find quiet zone offset
+  let quietX = 0;
+  for (let x = 0; x < baseSize; x++) {
+    if (d[(firstRow*baseSize+x)*4] < 128) { quietX = x; break; }
+  }
+  let quietY = firstRow;
+
+  const moduleCount = Math.round((baseSize - quietX*2) / mSize);
+  const matrix = [];
+  for (let my = 0; my < moduleCount; my++) {
+    matrix.push(new Uint8Array(moduleCount));
+    for (let mx = 0; mx < moduleCount; mx++) {
+      const px = quietX + mx*mSize + Math.floor(mSize/2);
+      const py = quietY + my*mSize + Math.floor(mSize/2);
+      if (px < baseSize && py < baseSize) {
+        matrix[my][mx] = d[(py*baseSize+px)*4] < 128 ? 1 : 0;
+      }
+    }
+  }
+  return { matrix, moduleCount, mSize, quietX, quietY };
+}
+
+/* Render QR to canvas from module matrix */
+function renderQR(matrix, size, fg, radiusPct, moduleCount) {
+  const out = document.getElementById('output-canvas');
+  out.width = out.height = size;
+  const ctx = out.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+
+  const [tr, tg, tb] = hexToRgb(fg);
+  const mPx = size / moduleCount;
+  const r   = (radiusPct / 100) * (mPx / 2);
+  const gap = radiusPct > 0 ? mPx * 0.08 : 0;
+
+  ctx.fillStyle = fg;
+
+  if (radiusPct === 0) {
+    // Fast path
+    const imgData = ctx.createImageData(size, size);
+    const d = imgData.data;
+    for (let my = 0; my < moduleCount; my++) {
+      for (let mx = 0; mx < moduleCount; mx++) {
+        if (!matrix[my][mx]) continue;
+        const startX = Math.round(mx * mPx);
+        const startY = Math.round(my * mPx);
+        const endX   = Math.round((mx+1) * mPx);
+        const endY   = Math.round((my+1) * mPx);
+        for (let py = startY; py < endY && py < size; py++) {
+          for (let px = startX; px < endX && px < size; px++) {
+            const i = (py*size+px)*4;
+            d[i]=tr; d[i+1]=tg; d[i+2]=tb; d[i+3]=255;
+          }
+        }
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  } else {
+    for (let my = 0; my < moduleCount; my++) {
+      for (let mx = 0; mx < moduleCount; mx++) {
+        if (!matrix[my][mx]) continue;
+        roundRect(ctx, mx*mPx + gap/2, my*mPx + gap/2, mPx-gap, mPx-gap, r);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+/* Build SVG string from module matrix */
+function buildSVG(matrix, moduleCount, fg, radiusPct) {
+  const cell = 10; // 10px per module
+  const total = moduleCount * cell;
+  const r = (radiusPct / 100) * (cell / 2);
+  const gap = radiusPct > 0 ? cell * 0.08 : 0;
+
+  let paths = '';
+  for (let my = 0; my < moduleCount; my++) {
+    for (let mx = 0; mx < moduleCount; mx++) {
+      if (!matrix[my][mx]) continue;
+      const x = mx*cell + gap/2, y = my*cell + gap/2;
+      const w = cell-gap, h = cell-gap;
+      if (r < 0.5) {
+        paths += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}"/>`;
+      } else {
+        const cr = Math.min(r, w/2, h/2).toFixed(2);
+        paths += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" rx="${cr}"/>`;
+      }
+    }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="${total}" height="${total}"><g fill="${fg}">${paths}</g></svg>`;
+}
+
+/* Readability check: contrast ratio + module density */
+function checkReadability(fg, moduleCount) {
+  // For transparent BG we check against white (print) and black (dark bg)
+  const [r,g,b] = hexToRgb(fg);
+  function relativeLum(rc,gc,bc) {
+    const srgb = [rc,gc,bc].map(c => { c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); });
+    return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
+  }
+  const L1 = relativeLum(r,g,b);
+  const Lwhite = 1, Lblack = 0;
+  const contrastWhite = (Lwhite+0.05)/(L1+0.05);
+  const contrastBlack = (L1+0.05)/(Lblack+0.05);
+  const maxContrast = Math.max(contrastWhite, contrastBlack);
+
+  let level, icon, text;
+  if (maxContrast >= 7) {
+    level='ok'; icon='✓'; text=`Читаемость отличная — контраст ${maxContrast.toFixed(1)}:1`;
+  } else if (maxContrast >= 4.5) {
+    level='warn'; icon='⚠'; text=`Читаемость нормальная — контраст ${maxContrast.toFixed(1)}:1`;
+  } else if (maxContrast >= 3) {
+    level='warn'; icon='⚠'; text=`Слабый контраст ${maxContrast.toFixed(1)}:1 — возможны проблемы`;
+  } else {
+    level='err'; icon='✗'; text=`Низкий контраст ${maxContrast.toFixed(1)}:1 — QR может не читаться`;
+  }
+  return { level, icon, text };
+}
+
+/* ══ GLOBAL STATE for live radius preview ══ */
+let lastQRData = null, lastSize = 512, lastFg = '#000000', lastModuleCount = 0;
+
+/* ══ GENERATE SINGLE ══ */
 function generate() {
   const url = document.getElementById('url-input').value.trim();
   if (!url) { alert('Введите URL или текст'); return; }
@@ -493,151 +651,314 @@ function generate() {
   const ec     = document.getElementById('ec-level').value;
   const fg     = document.getElementById('fg-color').value;
   const radius = parseInt(radiusInput.value);
+  const format = document.getElementById('format-select').value;
+
+  lastFg = fg; lastSize = size;
 
   const hidden = document.getElementById('qr-hidden');
   hidden.innerHTML = '';
-  const baseSize = 256;
+  const baseSize = 512;
 
   try {
-    new QRCode(hidden, {
-      text: url,
-      width: baseSize, height: baseSize,
-      colorDark:  '#000000',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel[ec]
-    });
-  } catch(e) {
-    alert('Ошибка генерации: ' + e.message);
-    return;
-  }
+    new QRCode(hidden, { text: url, width: baseSize, height: baseSize, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel[ec] });
+  } catch(e) { alert('Ошибка генерации: ' + e.message); return; }
 
   setTimeout(() => {
     const srcCanvas = hidden.querySelector('canvas');
     if (!srcCanvas) { alert('Не удалось создать QR'); return; }
 
-    const tmp = document.createElement('canvas');
-    tmp.width = tmp.height = baseSize;
-    const ctx = tmp.getContext('2d');
-    ctx.drawImage(srcCanvas, 0, 0);
-    const imgData = ctx.getImageData(0, 0, baseSize, baseSize);
-    const d = imgData.data;
-    const [tr, tg, tb] = hexToRgb(fg);
+    const { matrix, moduleCount } = extractModuleMatrix(srcCanvas);
+    lastQRData = matrix; lastModuleCount = moduleCount;
 
-    // Build module map
-    const isModule = new Uint8Array(baseSize * baseSize);
-    for (let i = 0; i < d.length; i += 4) {
-      isModule[i / 4] = d[i] < 128 ? 1 : 0;
-    }
-
-    // Detect module pixel size
-    let moduleSize = 1, inRun = false;
-    for (let x = 0; x < baseSize; x++) {
-      if (isModule[x] && !inRun)       { inRun = true; moduleSize = 1; }
-      else if (isModule[x] && inRun)   { moduleSize++; }
-      else if (!isModule[x] && inRun)  { break; }
-    }
-    moduleSize = Math.max(1, moduleSize);
-
-    const out    = document.getElementById('output-canvas');
-    out.width = out.height = size;
-    const outCtx = out.getContext('2d');
-    outCtx.clearRect(0, 0, size, size);
-    outCtx.fillStyle = fg;
-
-    const scale = size / baseSize;
-    const mPx   = moduleSize * scale;
-    const r     = (radius / 100) * (mPx / 2);
-    const gap   = radius > 0 ? mPx * 0.1 : 0;
-
-    if (radius === 0) {
-      // Fast pixel path
-      for (let i = 0; i < d.length; i += 4) {
-        if (isModule[i/4]) {
-          d[i] = tr; d[i+1] = tg; d[i+2] = tb; d[i+3] = 255;
-        } else {
-          d[i+3] = 0;
-        }
-      }
-      ctx.putImageData(imgData, 0, 0);
-      outCtx.imageSmoothingEnabled = false;
-      outCtx.drawImage(tmp, 0, 0, size, size);
+    if (format === 'svg') {
+      // Render to canvas for preview only
+      const svgStr = buildSVG(matrix, moduleCount, fg, radius);
+      const img = new Image();
+      const blob = new Blob([svgStr], {type:'image/svg+xml'});
+      const blobUrl = URL.createObjectURL(blob);
+      img.onload = () => {
+        const out = document.getElementById('output-canvas');
+        out.width = out.height = size;
+        const ctx = out.getContext('2d');
+        ctx.clearRect(0,0,size,size);
+        ctx.drawImage(img, 0, 0, size, size);
+        URL.revokeObjectURL(blobUrl);
+        finalizeSingle(fg, moduleCount, size, 'SVG');
+      };
+      img.src = blobUrl;
     } else {
-      // Rounded rect path
-      for (let py = 0; py < baseSize; py += moduleSize) {
-        for (let px = 0; px < baseSize; px += moduleSize) {
-          if (!isModule[py * baseSize + px]) continue;
-          roundRect(outCtx, px * scale + gap/2, py * scale + gap/2, mPx - gap, mPx - gap, r);
-        }
-      }
-      outCtx.fill();
+      renderQR(matrix, size, fg, radius, moduleCount);
+      finalizeSingle(fg, moduleCount, size, 'PNG');
     }
-
-    // Reset copy btn
-    const cb = document.getElementById('copy-btn');
-    cb.textContent = '⎘ Копировать';
-    cb.classList.remove('copied');
-
-    document.getElementById('preview-area').classList.add('visible');
-    document.getElementById('size-note').textContent = `${size} × ${size} px`;
-    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 200);
+  }, 150);
 }
 
-/* ══ DOWNLOAD ══ */
+function finalizeSingle(fg, moduleCount, size, fmt) {
+  const { level, icon, text } = checkReadability(fg, moduleCount);
+  const rb = document.getElementById('readability-result');
+  rb.innerHTML = `<div class="readability-badge ${level}"><span class="badge-icon">${icon}</span><span>${text}</span></div>`;
+
+  const cb = document.getElementById('copy-btn');
+  cb.textContent = '⎘ Копировать';
+  cb.classList.remove('copied');
+
+  document.getElementById('preview-area').classList.add('visible');
+  document.getElementById('size-note').textContent = `${size} × ${size} px · ${fmt}`;
+  document.getElementById('output-canvas').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ══ DOWNLOAD SINGLE ══ */
 function download() {
-  const a = document.createElement('a');
-  a.download = 'qr-code.png';
-  a.href = document.getElementById('output-canvas').toDataURL('image/png');
-  a.click();
+  const format = document.getElementById('format-select').value;
+  const fg     = document.getElementById('fg-color').value;
+  const radius = parseInt(radiusInput.value);
+
+  if (format === 'svg' && lastQRData) {
+    const svgStr = buildSVG(lastQRData, lastModuleCount, fg, radius);
+    const a = document.createElement('a');
+    a.download = 'qr-code.svg';
+    a.href = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+    a.click();
+  } else {
+    const a = document.createElement('a');
+    a.download = 'qr-code.png';
+    a.href = document.getElementById('output-canvas').toDataURL('image/png');
+    a.click();
+  }
 }
 
-/* ══ COPY TO CLIPBOARD ══ */
+/* ══ COPY ══ */
 function copyToClipboard() {
   const canvas = document.getElementById('output-canvas');
   const btn    = document.getElementById('copy-btn');
-
   canvas.toBlob(blob => {
-    if (!blob) { showCopyState(btn, 'error'); return; }
+    if (!blob) { showCopyState(btn,'error'); return; }
     if (navigator.clipboard && navigator.clipboard.write) {
       try {
-        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-          .then(() => showCopyState(btn, 'ok'))
-          .catch(() => fallbackCopy(canvas, btn));
-      } catch(e) { fallbackCopy(canvas, btn); }
-    } else {
-      fallbackCopy(canvas, btn);
-    }
+        navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
+          .then(() => showCopyState(btn,'ok'))
+          .catch(() => fallbackCopy(canvas,btn));
+      } catch(e) { fallbackCopy(canvas,btn); }
+    } else { fallbackCopy(canvas,btn); }
   }, 'image/png');
 }
-
 function showCopyState(btn, state) {
-  if (state === 'ok') {
-    btn.textContent = '✓ Скопировано';
-    btn.classList.add('copied');
-  } else {
-    btn.textContent = '✗ Ошибка';
-  }
-  setTimeout(() => {
-    btn.textContent = '⎘ Копировать';
-    btn.classList.remove('copied');
-  }, 2200);
+  if (state==='ok') { btn.textContent='✓ Скопировано'; btn.classList.add('copied'); }
+  else btn.textContent='✗ Ошибка';
+  setTimeout(() => { btn.textContent='⎘ Копировать'; btn.classList.remove('copied'); }, 2200);
 }
-
 function fallbackCopy(canvas, btn) {
   const w = window.open('');
   if (w) {
-    w.document.write('<body style="margin:0;background:#111"><img src="' + canvas.toDataURL() + '" style="max-width:100%;display:block"></body>');
-    btn.textContent = '↗ Открыто в табе';
-    setTimeout(() => { btn.textContent = '⎘ Копировать'; }, 2500);
+    w.document.write('<body style="margin:0;background:#111"><img src="'+canvas.toDataURL()+'" style="max-width:100%;display:block"></body>');
+    btn.textContent='↗ Открыто в табе';
+    setTimeout(()=>{btn.textContent='⎘ Копировать';},2500);
+  } else showCopyState(btn,'error');
+}
+
+/* ══ BATCH ══ */
+let batchRows = [];
+let batchRowId = 0;
+const BATCH_COLORS = ['#000000','#e53935','#1e88e5','#43a047','#8e24aa','#fb8c00','#00acc1','#6d4c41'];
+
+function addBatchRow(url='', color='') {
+  const id = batchRowId++;
+  if (!color) color = BATCH_COLORS[batchRows.length % BATCH_COLORS.length];
+  batchRows.push({ id, url, color });
+  renderBatchList();
+}
+
+function removeBatchRow(id) {
+  batchRows = batchRows.filter(r => r.id !== id);
+  renderBatchList();
+}
+
+function renderBatchList() {
+  const container = document.getElementById('batch-url-list');
+  container.innerHTML = '';
+  if (batchRows.length === 0) {
+    container.innerHTML = '<p style="font-size:12px;color:var(--muted);margin-bottom:12px;letter-spacing:0.04em;">Список пуст. Добавьте URL ниже.</p>';
+    return;
+  }
+  batchRows.forEach(row => {
+    const div = document.createElement('div');
+    div.className = 'batch-url-row';
+    div.innerHTML = `
+      <input type="text" placeholder="https://example.com" value="${escHtml(row.url)}" 
+        oninput="updateBatchRow(${row.id},'url',this.value)"
+        autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+      <div class="batch-color-swatch" title="Цвет QR">
+        <input type="color" value="${row.color}" oninput="updateBatchRow(${row.id},'color',this.value)">
+      </div>
+      <button class="batch-remove" onclick="removeBatchRow(${row.id})" title="Удалить">×</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateBatchRow(id, field, value) {
+  const row = batchRows.find(r => r.id === id);
+  if (row) row[field] = value;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+/* Init with 3 rows */
+addBatchRow('', BATCH_COLORS[0]);
+addBatchRow('', BATCH_COLORS[1]);
+addBatchRow('', BATCH_COLORS[2]);
+
+function generateBatch() {
+  // Read current values from DOM inputs
+  const rows = [];
+  document.querySelectorAll('#batch-url-list .batch-url-row').forEach((div, i) => {
+    const urlInput = div.querySelector('input[type="text"]');
+    const colorInput = div.querySelector('input[type="color"]');
+    if (urlInput && colorInput && urlInput.value.trim()) {
+      rows.push({ url: urlInput.value.trim(), color: colorInput.value, id: batchRows[i]?.id ?? i });
+    }
+  });
+
+  if (rows.length === 0) { alert('Добавьте хотя бы один URL'); return; }
+
+  const ec      = document.getElementById('batch-ec-level').value;
+  const radius  = parseInt(document.getElementById('batch-radius-input').value);
+  const size    = Math.max(128, Math.min(2048, parseInt(document.getElementById('batch-size-input').value)||512));
+  const format  = document.getElementById('batch-format-select').value;
+
+  const resultsDiv = document.getElementById('batch-results');
+  resultsDiv.innerHTML = `<p style="font-size:12px;color:var(--muted);letter-spacing:0.05em;">Генерация...</p>`;
+
+  const cards = [];
+  let processed = 0;
+
+  function processNext(i) {
+    if (i >= rows.length) {
+      renderBatchResults(cards, format);
+      return;
+    }
+    const row = rows[i];
+    const hidden = document.getElementById('qr-hidden');
+    hidden.innerHTML = '';
+    try {
+      new QRCode(hidden, { text: row.url, width: 512, height: 512, colorDark:'#000000', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel[ec] });
+    } catch(e) { processNext(i+1); return; }
+
+    setTimeout(() => {
+      const srcCanvas = hidden.querySelector('canvas');
+      if (!srcCanvas) { processNext(i+1); return; }
+      const { matrix, moduleCount } = extractModuleMatrix(srcCanvas);
+
+      // Render to offscreen canvas for PNG / preview
+      const offscreen = document.createElement('canvas');
+      offscreen.width = offscreen.height = size;
+      const ctx = offscreen.getContext('2d');
+      ctx.clearRect(0,0,size,size);
+
+      // Temporarily swap output canvas
+      const realOut = document.getElementById('output-canvas');
+      const savedId = realOut.id;
+      realOut.id = '__saved__';
+      offscreen.id = 'output-canvas';
+      document.body.appendChild(offscreen);
+
+      renderQR(matrix, size, row.color, radius, moduleCount);
+
+      offscreen.id = '';
+      realOut.id = savedId;
+      document.body.removeChild(offscreen);
+
+      const read = checkReadability(row.color, moduleCount);
+      const svgStr = format === 'svg' ? buildSVG(matrix, moduleCount, row.color, radius) : null;
+      cards.push({ url: row.url, color: row.color, canvas: offscreen, svgStr, read, format });
+      processNext(i+1);
+    }, 150);
+  }
+  processNext(0);
+}
+
+function renderBatchResults(cards, format) {
+  const resultsDiv = document.getElementById('batch-results');
+  resultsDiv.innerHTML = `
+    <div class="batch-header">
+      <span class="batch-header-title">${cards.length} QR готово</span>
+      <button class="batch-dl-all-btn" onclick="downloadAll()">↓ Скачать все</button>
+    </div>
+    <div class="batch-result-grid" id="batch-grid"></div>
+  `;
+  const grid = document.getElementById('batch-grid');
+  window._batchCards = cards;
+
+  cards.forEach((card, i) => {
+    const div = document.createElement('div');
+    div.className = 'batch-card';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'batch-card-canvas-wrap';
+    wrap.appendChild(card.canvas);
+    card.canvas.style.cssText = 'position:relative;z-index:1;width:100%;height:100%;display:block;';
+
+    const shortUrl = card.url.replace(/^https?:\/\//,'').slice(0,40) + (card.url.length>47?'…':'');
+    const colorName = card.color.toUpperCase();
+
+    div.innerHTML = `
+      <div class="batch-card-color">
+        <div class="batch-color-dot" style="background:${card.color}"></div>
+        <span>${colorName}</span>
+      </div>
+    `;
+    div.insertBefore(wrap, div.firstChild);
+    div.innerHTML += `
+      <div class="batch-card-url" title="${escHtml(card.url)}">${escHtml(shortUrl)}</div>
+      <div class="batch-readability ${card.read.level}">${card.read.icon} ${card.read.text.split('—')[0].trim()}</div>
+      <div class="batch-card-actions">
+        <button class="batch-dl-btn" onclick="downloadCard(${i})">↓ ${format.toUpperCase()}</button>
+        <button class="batch-dl-btn" onclick="copyCard(${i})">⎘ Copy</button>
+      </div>
+    `;
+    // Re-insert canvas
+    const insertedWrap = div.querySelector('.batch-card-canvas-wrap');
+    if (!insertedWrap) {
+      div.insertBefore(wrap, div.children[1]);
+    }
+    grid.appendChild(div);
+    // Append canvas to its wrap
+    div.querySelectorAll('.batch-card-canvas-wrap')[0].appendChild(card.canvas);
+  });
+}
+
+function downloadCard(i) {
+  const card = window._batchCards[i];
+  const slug = card.url.replace(/^https?:\/\//,'').replace(/[^a-zA-Z0-9]/g,'-').slice(0,30);
+  if (card.format === 'svg' && card.svgStr) {
+    const a = document.createElement('a');
+    a.download = `qr-${slug}.svg`;
+    a.href = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(card.svgStr);
+    a.click();
   } else {
-    showCopyState(btn, 'error');
+    const a = document.createElement('a');
+    a.download = `qr-${slug}.png`;
+    a.href = card.canvas.toDataURL('image/png');
+    a.click();
   }
 }
 
+function copyCard(i) {
+  const card = window._batchCards[i];
+  card.canvas.toBlob(blob => {
+    if (!blob) return;
+    try { navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); } catch(e) {}
+  }, 'image/png');
+}
+
+function downloadAll() {
+  const cards = window._batchCards;
+  if (!cards) return;
+  cards.forEach((card,i) => setTimeout(() => downloadCard(i), i*200));
+}
+
 /* ══ KEYBOARD ══ */
-document.getElementById('url-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') generate();
-});
+document.getElementById('url-input').addEventListener('keydown', e => { if (e.key==='Enter') generate(); });
 </script>
 </body>
 </html>
